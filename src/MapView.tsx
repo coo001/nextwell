@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { readingColor } from './lib/color.ts'
 import { CROWDED_FROM, type Plan, type Well } from './lib/plan.ts'
 
@@ -11,14 +11,20 @@ interface Props {
   focusIds?: string[]
   height?: number
   measure?: 'field' | 'lab'
+  /** Show the whole-village / around-this-well switch. */
+  zoomable?: boolean
 }
 
 const W = 900
 const PAD = 28
 
-export default function MapView({ wells, plan, selectedId, onSelect, focusIds, height = 620, measure = 'field' }: Props) {
+export default function MapView({ wells, plan, selectedId, onSelect, focusIds, height = 620, measure = 'field', zoomable = false }: Props) {
+  const [near, setNear] = useState(false)
+  const selWell = selectedId ? wells.find((w) => w.id === selectedId) : undefined
+  const zoomed = zoomable && near && !!selWell
+  const close = focusIds !== undefined || zoomed
   const view = useMemo(() => {
-    const src = focusIds ? wells.filter((w) => focusIds.includes(w.id)) : wells
+    const src = focusIds ? wells.filter((w) => focusIds.includes(w.id)) : zoomed ? [selWell!] : wells
     if (src.length === 0) return null
     const lat0 = src.reduce((s, w) => s + w.lat, 0) / src.length
     const kx = 111320 * Math.cos((lat0 * Math.PI) / 180)
@@ -30,7 +36,7 @@ export default function MapView({ wells, plan, selectedId, onSelect, focusIds, h
     let minY = Math.min(...ys)
     let maxY = Math.max(...ys)
     // Never zoom in closer than about 300 m across; it would overstate coordinate precision.
-    const minSpan = focusIds ? 120 : 300
+    const minSpan = focusIds ? 120 : zoomed ? 760 : 300
     if (maxX - minX < minSpan) [minX, maxX] = [(minX + maxX - minSpan) / 2, (minX + maxX + minSpan) / 2]
     if (maxY - minY < minSpan) [minY, maxY] = [(minY + maxY - minSpan) / 2, (minY + maxY + minSpan) / 2]
     if (focusIds) {
@@ -52,7 +58,7 @@ export default function MapView({ wells, plan, selectedId, onSelect, focusIds, h
     const gy: number[] = []
     for (let m = Math.ceil(minY / step) * step; m <= maxY; m += step) gy.push(height - oy - (m - minY) * scale)
     return { px, scale, step, gx, gy }
-  }, [wells, focusIds, height])
+  }, [wells, focusIds, height, zoomed, selWell])
 
   if (!view) {
     return <div className="map-empty">No wells yet. Add the first well to start the map.</div>
@@ -61,11 +67,18 @@ export default function MapView({ wells, plan, selectedId, onSelect, focusIds, h
   const pts = new Map(wells.map((w) => [w.id, view.px(w)]))
   const inView = (p: { x: number; y: number }) => p.x >= -20 && p.x <= W + 20 && p.y >= -20 && p.y <= height + 20
   const sel = selectedId ? plan?.byId.get(selectedId) : undefined
-  const r = focusIds ? 9 : 4.6
+  const r = focusIds ? 9 : zoomed ? 7.5 : 4.6
   const barM = view.step
   const barPx = barM * view.scale
 
   return (
+    <div className="mapwrap">
+      {zoomable && (
+        <div className="seg zoom" role="group" aria-label="Map zoom">
+          <button className={zoomed ? '' : 'on'} onClick={() => setNear(false)}>Whole village</button>
+          <button className={zoomed ? 'on' : ''} disabled={!selWell} onClick={() => setNear(true)}>Around selected well</button>
+        </div>
+      )}
     <svg
       className="map"
       viewBox={`0 0 ${W} ${height}`}
@@ -124,7 +137,7 @@ export default function MapView({ wells, plan, selectedId, onSelect, focusIds, h
             />
             {(isSel || related) && <circle cx={p.x} cy={p.y} r={r + 4} className="sel" />}
             {n >= CROWDED_FROM && <text x={p.x + r + 8} y={p.y - r - 4} className="crowd-n">{n}</text>}
-            {focusIds && <text x={p.x} y={p.y + r + 16} textAnchor="middle" className="pt-label">{w.label ?? w.id}</text>}
+            {close && (focusIds || isSel || related) && <text x={p.x} y={p.y + r + 16} textAnchor="middle" className="pt-label">{w.label ?? w.id}</text>}
           </g>
         )
       })}
@@ -140,5 +153,6 @@ export default function MapView({ wells, plan, selectedId, onSelect, focusIds, h
         <text x={0} y={22} textAnchor="middle">N</text>
       </g>
     </svg>
+    </div>
   )
 }

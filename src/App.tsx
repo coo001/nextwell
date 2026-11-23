@@ -184,7 +184,7 @@ export default function App() {
               <div className="split">
                 <div className="mapcol">
                   <Legend plan />
-                  <MapView wells={wells} plan={plan} selectedId={selectedId} onSelect={setSelectedId} measure={measure} />
+                  <MapView wells={wells} plan={plan} selectedId={selectedId} onSelect={setSelectedId} measure={measure} zoomable />
                   <p className="note">{SAFETY_NOTE}</p>
                 </div>
                 <aside className="side">
@@ -335,7 +335,7 @@ function WellsScreen(p: WellsProps) {
       <div className="split">
         <div className="mapcol">
           <Legend />
-          <MapView wells={p.wells} selectedId={p.selected?.id ?? null} onSelect={p.onSelect} />
+          <MapView wells={p.wells} selectedId={p.selected?.id ?? null} onSelect={p.onSelect} zoomable />
           <p className="note">{SAFETY_NOTE}</p>
         </div>
         <aside className="side">
