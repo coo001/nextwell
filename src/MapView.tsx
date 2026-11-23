@@ -58,7 +58,6 @@ export default function MapView({ wells, plan, selectedId, onSelect, focusIds, h
     return <div className="map-empty">No wells yet. Add the first well to start the map.</div>
   }
 
-  const byId = new Map(wells.map((w) => [w.id, w]))
   const pts = new Map(wells.map((w) => [w.id, view.px(w)]))
   const inView = (p: { x: number; y: number }) => p.x >= -20 && p.x <= W + 20 && p.y >= -20 && p.y <= height + 20
   const sel = selectedId ? plan?.byId.get(selectedId) : undefined
@@ -140,8 +139,6 @@ export default function MapView({ wells, plan, selectedId, onSelect, focusIds, h
         <path d="M0 -18L6 6L0 1L-6 6z" />
         <text x={0} y={22} textAnchor="middle">N</text>
       </g>
-      {/* byId kept for tooltips of related wells */}
-      {sel && sel.status === 'switch' && byId.has(sel.useId) && null}
     </svg>
   )
 }
