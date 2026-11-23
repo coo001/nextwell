@@ -13,7 +13,7 @@ Built for the Acodemic X KeebsforWater Global SDG Hackathon. SDG 6.1 (safe drink
 
 ## The problem
 
-In rural Bangladesh many households drink from shallow tube wells, and many of those wells carry arsenic above the national limit of 50 µg/L (the WHO guideline is 10 µg/L). Arsenic varies a lot over short distances, so a well with a much lower reading is often a short walk away. Testing campaigns usually leave behind a binary mark (safe or unsafe) on each well. That mark does not tell a household which nearby well is lower, how far it is, or how big the difference is.
+In rural Bangladesh many households drink from shallow tube wells, and many of those wells carry arsenic above the national limit of 50 µg/L (the WHO guideline is 10 µg/L). Arsenic varies a lot over short distances, so a well with a much lower reading is often close by. Testing campaigns usually leave behind a binary mark (safe or unsafe) on each well. That mark does not tell a household which nearby well is lower, how far it is, or how big the difference is.
 
 NextWell is for the person who holds the village's test results: a health volunteer or an NGO field worker.
 
@@ -40,7 +40,7 @@ NextWell is for the person who holds the village's test results: a health volunt
 | Wells above 50 µg/L, lab values | 166 | 76 |
 | Mean at the well in use, lab values (µg/L, "<30" counted as 15) | 121 | 53 |
 
-- 113 wells get a candidate, spread over 39 receiving wells. Median walk 135 m.
+- 113 wells get a candidate, spread over 39 receiving wells. Median straight-line distance 135 m.
 - All 113 candidates are lower by lab value as well. This is a look-back on the same 1999 sample: it shows the moves point the right way, not that the rule is safe or effective today.
 - 18 candidates are lower but still above the limit. 62 wells have no candidate within 200 m.
 - 6 receiving wells take users from 6 or more wells (the most is 11). The app marks them as crowded.
@@ -65,11 +65,11 @@ Stack: React 19, TypeScript, Vite, Vitest, hand-written SVG and CSS.
 
 ## Data
 
-The built-in village is the Mandari Village Survey (Lakshmipur district, Bangladesh), 236 tube wells sampled from 22 November 1999, published with the BGS/DPHE study below. ### How the JSON was made
+The built-in village is the Mandari Village Survey (Lakshmipur district, Bangladesh), 236 tube wells sampled from 22 November 1999, published with the BGS/DPHE study below.This repository contains only a processed JSON file (`src/data/mandari_wells.json`) with the columns the app uses: well ID, coordinates, depth, well type, year, sampling date, field-kit arsenic and laboratory arsenic. The original CSV is not redistributed here; it can be downloaded from the [BGS Bangladesh reports and data page](https://www.bgs.ac.uk/groundwater/quality/groundwater-and-health/arsenic-contamination-of-groundwater/bangladesh-reports/).
+
+### How the JSON was made
 
 From `MandariSurveyData.csv` (236 data rows) I kept these columns and nothing else: sample ID, latitude, longitude, well depth, well type, year of construction, sampling date, the field-kit arsenic column ("As arsenator") and the laboratory arsenic column ("As lab"), both in µg/L. Two changes were made: a lab value reported as `<30` is stored as 15 with `lab_below_detection: true` (the app displays it as "<30" and uses 15 only in means), and numbers are parsed from text. No rows were dropped, no values were smoothed or imputed otherwise. To reproduce the figures: download the CSV, apply the same mapping, run `npm test`.
-
-This repository contains only a processed JSON file (`src/data/mandari_wells.json`) with the columns the app uses: well ID, coordinates, depth, well type, year, sampling date, field-kit arsenic and laboratory arsenic. The original CSV is not redistributed here; it can be downloaded from the [BGS Bangladesh reports and data page](https://www.bgs.ac.uk/groundwater/quality/groundwater-and-health/arsenic-contamination-of-groundwater/bangladesh-reports/).
 
 > BGS and DPHE. 2001. Arsenic contamination of groundwater in Bangladesh. Kinniburgh, D G, and Smedley, P L (editors). British Geological Survey Technical Report WC/00/19. (Nottingham, UK: British Geological Survey.)
 

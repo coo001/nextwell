@@ -18,7 +18,7 @@ export interface Well {
 }
 
 export interface PlanOptions {
-  /** Maximum straight-line walking distance in metres. */
+  /** Maximum straight-line distance in metres. */
   maxDistanceM: number
   /** A candidate must read at most ratio x the current well. */
   ratio: number

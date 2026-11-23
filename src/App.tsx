@@ -163,7 +163,7 @@ export default function App() {
                 <div className="card">
                   <span className="k">Candidate switches</span>
                   <div className="one">{summary.switches}</div>
-                  <span className="d">into {summary.receivers} {summary.receivers === 1 ? "well" : "wells"} · median walk {fmt(summary.medianWalkM)} m · {summary.stillAbove} lower but still above the limit</span>
+                  <span className="d">into {summary.receivers} {summary.receivers === 1 ? "well" : "wells"} · median straight-line distance {fmt(summary.medianWalkM)} m · {summary.stillAbove} lower but still above the limit</span>
                 </div>
                 <div className="card">
                   <span className="k">No lower well in range</span>
