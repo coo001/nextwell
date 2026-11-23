@@ -92,7 +92,7 @@ export default function App() {
           <h1>Not red or green.<br />Which well, how far, how much lower.</h1>
           <p className="lede">
             NextWell takes the field arsenic reading of every tube well in a village and shows each well's users
-            the lowest-reading well within walking distance. Then it checks that plan against lab results.
+            the lowest-reading well nearby, with the distance and the difference. Then it scores that plan against lab results.
           </p>
           <div className="cta">
             <button className="primary" onClick={() => open('mandari')}>Open Mandari survey (real data, 1999)</button>
@@ -101,7 +101,7 @@ export default function App() {
           <ul className="facts">
             <li><strong>236</strong> wells measured in one village (Mandari, Lakshmipur)</li>
             <li><strong>175</strong> read above Bangladesh's 50 µg/L limit</li>
-            <li><strong>80</strong> would remain if each well's users walked up to 200 m to a well reading half or less</li>
+            <li><strong>80</strong> would remain if each well's users went to a well within 200 m (straight line) reading half or less</li>
           </ul>
           <p className="small">
             These are a recalculation on a 1999 survey, not a field result. Counts are wells, not people.
@@ -128,14 +128,14 @@ export default function App() {
             <div>
               <h1>Switching plan</h1>
               <p className="sub">
-                For each well above 50 µg/L: the lowest-reading shared well within the walking distance,
-                only if it reads half or less. Half, because field kits are imprecise.
+                For each well above 50 µg/L: the lowest-reading shared well within the distance (straight line),
+                only if it reads half or less. Half is a cautious design choice for imprecise field kits, not a validated safety factor.
               </p>
             </div>
             <div className="controls">
               <label className="slider">
-                <span>Walking distance <strong>{D} m</strong></span>
-                <input type="range" min={50} max={300} step={10} value={D} onChange={(e) => setD(+e.target.value)} aria-label="Maximum walking distance in metres" />
+                <span>Distance, straight line <strong>{D} m</strong></span>
+                <input type="range" min={50} max={300} step={10} value={D} onChange={(e) => setD(+e.target.value)} aria-label="Maximum straight-line distance in metres" />
                 <span className="range-ends"><i>50</i><i>300 m</i></span>
               </label>
               <label className={`toggle${hasLab ? '' : ' off'}`}>
@@ -172,12 +172,19 @@ export default function App() {
                 </div>
               </section>
 
+              {dataset === 'mandari' && (
+                <p className="caveat" id="caveat">
+                  Recalculation on the 1999 Mandari survey{edited ? ' with your edits' : ''}. Counted in wells, not people. Not a field result, and lower is not the same as safe.
+                </p>
+              )}
+
               {measure === 'lab' && (
                 <p className="labline" id="labline">
                   The plan was built from field-kit readings only. Scored with lab values it never used:{' '}
                   <strong>{summary.labConfirmed} of {summary.labComparable}</strong> switches go to a well that is lower by lab value too.
                   Kit and lab agree on the 50 limit for {kit.agree} of {kit.compared} wells;{' '}
                   {kit.kitSafeLabAbove} wells the kit puts under the limit are above it by lab, {kit.kitAboveLabSafe} the other way round.
+                  This is a look-back on the same sample: it shows the moves point the right way, not that the rule is safe.
                 </p>
               )}
 
@@ -238,7 +245,7 @@ export default function App() {
             <h2>The rules, exactly</h2>
             <ol>
               <li>Only users of a well reading above 50 µg/L (Bangladesh's limit) get a candidate. Wells at or below 50 stay as they are.</li>
-              <li>A candidate must be within the walking distance (straight line, 50 to 300 m, default 200 m), shared by its owner, and read at most half of your well's reading.</li>
+              <li>A candidate must be within the chosen straight-line distance (50 to 300 m, default 200 m), shared by its owner, and read at most half of your well's reading.</li>
               <li>Among candidates the lowest reading wins; ties go to the nearer well, then to the earlier ID.</li>
               <li>If there is no candidate, the well is listed as "no lower well in range". An untested well is neither a source nor a candidate: it is listed as "test first".</li>
             </ol>
@@ -248,7 +255,7 @@ export default function App() {
             <h2>Data</h2>
             <p>
               The built-in village is the Mandari Village Survey (Lakshmipur district): 236 tube wells sampled from 22 November 1999,
-              with coordinates, a field-kit arsenic reading and a laboratory arsenic value for each well. Only those columns are included here, as processed JSON.
+              with coordinates, a field-kit arsenic reading and a laboratory arsenic value for each well. Only those columns are included here, as processed JSON. The source file and the processing steps are in the repository README.
             </p>
             <blockquote>{CITATION}</blockquote>
             <p className="small">{ACKNOWLEDGEMENT}</p>
@@ -259,7 +266,8 @@ export default function App() {
               <li>The survey is 27 years old. Nothing here describes a well as it is today.</li>
               <li>The numbers are a recalculation, not an outcome measured in a village. Nobody in Mandari has used this tool.</li>
               <li>Counts are wells, not people. The survey has no household or population figures.</li>
-              <li>Straight-line distance ignores paths, water bodies and whether an owner allows access.</li>
+              <li>Straight-line distance ignores paths, water bodies and whether an owner allows access. The sharing tick is what the user entered, not a verified permission.</li>
+              <li>"Crowded" is a warning from a count of wells. The app knows nothing about households, yield or capacity.</li>
               <li>Bangla text is machine-translated and has not been reviewed by a native speaker. The notice is a demo and carries a watermark.</li>
               <li>The 0.5 ratio and the 200 m default are design choices, not validated thresholds.</li>
             </ul>
@@ -268,6 +276,10 @@ export default function App() {
             <h2>Privacy and AI use</h2>
             <p>No account, no server, no analytics, no external API. Wells you enter are stored only in this browser's local storage.</p>
             <p>AI coding assistance was used to write this app. The calculation rules are fixed in code and covered by unit tests; no AI model runs in the app.</p>
+          </section>
+          <section>
+            <h2>Source code</h2>
+            <p><a href="https://github.com/coo001/nextwell">github.com/coo001/nextwell</a> (MIT). Run <code>npm test</code> to reproduce every number on this site.</p>
           </section>
           <p className="note">{SAFETY_NOTE}</p>
         </main>

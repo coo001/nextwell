@@ -38,7 +38,7 @@ export default function Sheet({ wells, plan, wellId, sourceNote }: Props) {
     en = `This well reads above the limit. No shared well within ${D} m reads half or less. Ask about a wider search or another water source.`
     bn = BN.noOption(D)
   } else {
-    en = `Candidate well: ${toName}, about ${dist} m to the ${DIR_EN[dir]}. It reads ${to!.field} \u00b5g/L; yours reads ${well.field} \u00b5g/L.`
+    en = `Candidate well: ${toName}, about ${dist} m in a straight line to the ${DIR_EN[dir]}. It reads ${to!.field} \u00b5g/L; yours reads ${well.field} \u00b5g/L.`
     bn = BN.switchLine(toName, DIR_BN[dir], dist, to!.field!, well.field!)
     if (a.stillAbove) {
       en += ' Lower, still above the limit.'

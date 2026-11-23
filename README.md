@@ -2,7 +2,12 @@
 
 **Not red or green. Which well, how far, how much lower.**
 
-NextWell takes the field arsenic reading of every tube well in a village and shows each well's users the lowest-reading well within walking distance. Then it checks that plan against laboratory results the plan never used.
+NextWell takes the field arsenic reading of every tube well in a village and shows each well's users the lowest-reading well nearby, with the straight-line distance and the difference. Then it scores that plan against laboratory results the plan never used.
+
+- **Live demo:** https://nextwell-sigma.vercel.app (no login; opens with a real 1999 survey)
+- **Source:** https://github.com/coo001/nextwell
+
+Status: a prototype. It is a recalculation on a 1999 survey. It has not been used in a village or tested by a field worker.
 
 Built for the Acodemic X KeebsforWater Global SDG Hackathon. SDG 6.1 (safe drinking water) and SDG 3.9 (deaths and illness from contaminated water).
 
@@ -15,14 +20,14 @@ NextWell is for the person who holds the village's test results: a health volunt
 ## What it does
 
 1. **Wells.** Opens a real survey (Mandari village, 236 tube wells, 1999) or lets you enter your own wells: position, field-kit reading, and whether the owner agrees to share. Wells are drawn from their coordinates on a plain grid, coloured by reading on a continuous scale with the 10 and 50 µg/L marks.
-2. **Switching plan.** For every well above 50 µg/L it finds a candidate well and draws an arrow to it. A slider sets the walking distance (50 to 300 m). The summary shows wells above the limit and the mean reading, before and after.
+2. **Switching plan.** For every well above 50 µg/L it finds a candidate well and draws an arrow to it. A slider sets the straight-line distance (50 to 300 m). The summary shows wells above the limit and the mean reading, before and after.
 3. **Lab check.** One toggle scores the same plan with laboratory values instead of field-kit readings.
 4. **Notice.** A one-page notice for the households of one well, in English and Bangla, with a small map, the direction and the distance.
 
 ### The rules (fixed, in `src/lib/plan.ts`)
 
 1. Only users of a well reading above 50 µg/L get a candidate. Wells at or below 50 stay as they are.
-2. A candidate must be within the walking distance (straight line), shared by its owner, and read **at most half** of your well's reading. Half, because field kits are imprecise.
+2. A candidate must be within the chosen straight-line distance, shared by its owner, and read **at most half** of your well's reading. Half is a cautious design choice for imprecise field kits, not a validated safety factor.
 3. The lowest reading wins. Ties go to the nearer well, then to the earlier ID.
 4. No candidate: the well is listed as "no lower well in range". An untested well is neither a source nor a candidate; it is listed as "test first".
 
@@ -36,7 +41,7 @@ NextWell is for the person who holds the village's test results: a health volunt
 | Mean at the well in use, lab values (µg/L, "<30" counted as 15) | 121 | 53 |
 
 - 113 wells get a candidate, spread over 39 receiving wells. Median walk 135 m.
-- All 113 candidates are lower by lab value as well.
+- All 113 candidates are lower by lab value as well. This is a look-back on the same 1999 sample: it shows the moves point the right way, not that the rule is safe or effective today.
 - 18 candidates are lower but still above the limit. 62 wells have no candidate within 200 m.
 - 6 receiving wells take users from 6 or more wells (the most is 11). The app marks them as crowded.
 - Kit and lab agree on the 50 limit for 219 of 236 wells. 4 wells the kit puts under the limit are above it by lab.
@@ -60,7 +65,11 @@ Stack: React 19, TypeScript, Vite, Vitest, hand-written SVG and CSS.
 
 ## Data
 
-The built-in village is the Mandari Village Survey (Lakshmipur district, Bangladesh), 236 tube wells sampled from 22 November 1999, published with the BGS/DPHE study below. This repository contains only a processed JSON file (`src/data/mandari_wells.json`) with the columns the app uses: well ID, coordinates, depth, well type, year, sampling date, field-kit arsenic and laboratory arsenic. The original CSV is not redistributed here; it can be downloaded from the [BGS Bangladesh reports and data page](https://www.bgs.ac.uk/groundwater/quality/groundwater-and-health/arsenic-contamination-of-groundwater/bangladesh-reports/).
+The built-in village is the Mandari Village Survey (Lakshmipur district, Bangladesh), 236 tube wells sampled from 22 November 1999, published with the BGS/DPHE study below. ### How the JSON was made
+
+From `MandariSurveyData.csv` (236 data rows) I kept these columns and nothing else: sample ID, latitude, longitude, well depth, well type, year of construction, sampling date, the field-kit arsenic column ("As arsenator") and the laboratory arsenic column ("As lab"), both in µg/L. Two changes were made: a lab value reported as `<30` is stored as 15 with `lab_below_detection: true` (the app displays it as "<30" and uses 15 only in means), and numbers are parsed from text. No rows were dropped, no values were smoothed or imputed otherwise. To reproduce the figures: download the CSV, apply the same mapping, run `npm test`.
+
+This repository contains only a processed JSON file (`src/data/mandari_wells.json`) with the columns the app uses: well ID, coordinates, depth, well type, year, sampling date, field-kit arsenic and laboratory arsenic. The original CSV is not redistributed here; it can be downloaded from the [BGS Bangladesh reports and data page](https://www.bgs.ac.uk/groundwater/quality/groundwater-and-health/arsenic-contamination-of-groundwater/bangladesh-reports/).
 
 > BGS and DPHE. 2001. Arsenic contamination of groundwater in Bangladesh. Kinniburgh, D G, and Smedley, P L (editors). British Geological Survey Technical Report WC/00/19. (Nottingham, UK: British Geological Survey.)
 
@@ -71,9 +80,9 @@ This material was produced by the British Geological Survey and the Department o
 - The survey is 27 years old. Nothing here describes a well as it is today.
 - The numbers are a recalculation. Nobody in Mandari has used this tool, and no field worker has tested it.
 - Counts are wells, not people. The survey has no household or population figures.
-- Distance is a straight line. It ignores paths, water bodies and whether an owner actually allows access. Coordinates are rounded to about 10 m.
+- Distance is a straight line. It ignores paths, water bodies and whether an owner actually allows access. The "shared" tick is whatever the user entered, not a verified permission. Coordinates are rounded to about 10 m.
 - A well that receives many new users may run short of water or strain a relationship. The app flags crowding but does not solve it.
-- The 0.5 ratio and the 200 m default are design choices, not validated thresholds.
+- The 0.5 ratio and the 200 m default are design choices, not validated thresholds. The unit tests show the code follows the rules; they do not show the rules protect health.
 - Bangla text is machine-translated and has not been reviewed by a native speaker. It appears only on the demo notice, which carries a "DEMO – not for distribution" watermark.
 - Readings are field-kit values and can be wrong. An untested well is not a safe well. This is not a water-quality certificate or medical advice.
 
