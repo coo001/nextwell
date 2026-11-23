@@ -222,4 +222,4 @@ blockquote { margin: 0; padding: 0.7rem 0.9rem; border-left: 4px solid var(--tea
 /* map zoom switch */
 .mapwrap { position: relative; }
 .seg.zoom { position: absolute; left: 10px; top: 10px; background: var(--card); z-index: 1; }
-.seg.zoom button { min-height: 36px; }
+.seg.zoom button { min-height: 36px; white-space: nowrap; }
